@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Futuristic Calculator</title>
+    <!-- Tailwind Play CDN for quick demo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* small custom styles for neon/glass effects */
+        :root {
+            --glass: rgba(255, 255, 255, 0.06);
+            --accent: #7c3aed;
+            /* purple */
+            --accent-2: #06b6d4;
+            /* teal */
+        }
+
+        body {
+            background: radial-gradient(1000px 600px at 10% 10%, rgba(124, 58, 237, 0.12), transparent),
+                radial-gradient(800px 500px at 90% 90%, rgba(6, 182, 212, 0.08), transparent),
+                #020617;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .panel {
+            backdrop-filter: blur(8px) saturate(140%);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 40px rgba(2, 6, 23, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        .screen {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.55), rgba(255, 255, 255, 0.02));
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 6px 24px rgba(124, 58, 237, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        .neon {
+            text-shadow: 0 2px 18px rgba(124, 58, 237, 0.35), 0 1px 1px rgba(124, 58, 237, 0.25);
+        }
+
+        .btn-neon {
+            transition: transform .08s ease, box-shadow .08s ease;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6), 0 0 18px rgba(124, 58, 237, 0.06);
+        }
+
+        .btn-neon:active {
+            transform: translateY(2px) scale(.995);
+            box-shadow: 0 4px 12px rgba(2, 6, 23, 0.6)
+        }
+
+        /* subtle grid lines */
+        .grid-line:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background-image: linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 100% 48px;
+            pointer-events: none;
+            border-radius: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="max-w-sm w-full p-6 panel rounded-3xl relative overflow-hidden">
+        <div
+            class="absolute -left-24 -top-24 w-64 h-64 rounded-full bg-gradient-to-br from-purple-500/10 to-cyan-400/6 blur-3xl">
+        </div>
+
+        <header class="flex items-center justify-between mb-4">
+            <div>
+                <h1 class="text-white text-xl font-semibold neon">AURORA CALC</h1>
+                <p class="text-xs text-slate-300/60">Futuristic & advanced — experimental UI</p>
+            </div>
+            <div class="flex gap-2 items-center">
+                <div class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_12px_rgba(249,115,22,0.12)]"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-400"></div>
+                <div class="w-3 h-3 rounded-full bg-green-400"></div>
+            </div>
+        </header>
+
+        <div class="screen p-4 grid grid-cols-1 gap-3 mb-4">
+            <div class="rounded-xl p-3 grid grid-cols-1 gap-1">
+                <div id="miniDisplay" class="text-xs text-slate-400 text-right truncate">0</div>
+                <div id="display" class="text-3xl font-medium text-right text-white truncate">0</div>
+            </div>
+            <div class="flex items-center justify-between text-xs text-slate-400">
+                <div class="flex items-center gap-3">
+                    <div class="px-2 py-1 rounded-md bg-white/3 text-white/90 text-[11px]">DEG</div>
+                    <div class="px-2 py-1 rounded-md bg-white/2 text-white/70 text-[11px]">PRO</div>
+                </div>
+                <div class="text-[12px] text-slate-300/70">⟲ History</div>
+            </div>
+        </div>
+
+        <!-- keypad -->
+        <div class="grid grid-cols-4 gap-3">
+            <!-- row 1 -->
+            <button class="btn-neon col-span-1 py-3 rounded-xl panel text-sm text-white/90" data-fn="clear">AC</button>
+            <button class="btn-neon col-span-1 py-3 rounded-xl panel text-sm text-white/90" data-fn="neg">+/-</button>
+            <button class="btn-neon col-span-1 py-3 rounded-xl panel text-sm text-white/90" data-fn="percent">%</button>
+            <button
+                class="btn-neon col-span-1 py-3 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-400 text-black font-semibold"
+                data-fn="/">÷</button>
+
+            <!-- row 2 -->
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="7">7</button>
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="8">8</button>
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="9">9</button>
+            <button
+                class="btn-neon col-span-1 py-4 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-400 text-black font-semibold"
+                data-fn="*">×</button>
+
+            <!-- row 3 -->
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="4">4</button>
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="5">5</button>
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="6">6</button>
+            <button
+                class="btn-neon col-span-1 py-4 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-400 text-black font-semibold"
+                data-fn="-">−</button>
+
+            <!-- row 4 -->
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="1">1</button>
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="2">2</button>
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num="3">3</button>
+            <button
+                class="btn-neon col-span-1 py-4 rounded-xl bg-gradient-to-br from-purple-600 to-cyan-400 text-black font-semibold"
+                data-fn="+">+</button>
+
+            <!-- row 5 -->
+            <button class="btn-neon col-span-2 py-4 rounded-xl panel text-lg text-white/90" data-num="0">0</button>
+            <button class="btn-neon col-span-1 py-4 rounded-xl panel text-lg text-white/90" data-num=".">.</button>
+            <button
+                class="btn-neon col-span-1 py-4 rounded-xl bg-gradient-to-br from-green-400/80 to-yellow-300/80 text-black font-bold"
+                data-fn="=">=</button>
+        </div>
+
+        <footer class="mt-4 text-xs text-slate-400 text-center">Tip: You can use your keyboard to type numbers +
+            operators</footer>
+    </div>
+
+    <script>
+        // Basic calculator logic (handles keyboard + buttons)
+        const displayEl = document.getElementById('display');
+        const miniEl = document.getElementById('miniDisplay');
+
+        let current = '0';
+        let prev = null;
+        let operator = null;
+        let resetNext = false;
+
+        function updateScreen() {
+            displayEl.textContent = current;
+            miniEl.textContent = prev ? (prev + (operator || '')) : '0';
+        }
+
+        function inputNumber(n) {
+            if (resetNext) { current = n === '.' ? '0.' : n; resetNext = false; return; }
+            if (current === '0' && n !== '.') current = n;
+            else if (n === '.' && current.includes('.')) return;
+            else current += n;
+        }
+
+        function setOperator(op) {
+            if (operator && !resetNext) { compute(); }
+            prev = current;
+            operator = op;
+            resetNext = true;
+        }
+
+        function compute() {
+            if (!operator || prev == null) return;
+            const a = parseFloat(prev);
+            const b = parseFloat(current);
+            let res = 0;
+            switch (operator) {
+                case '+': res = a + b; break;
+                case '-': res = a - b; break;
+                case '*': res = a * b; break;
+                case '/': res = b === 0 ? 'Error' : a / b; break;
+            }
+            current = String(res);
+            prev = null; operator = null; resetNext = true;
+        }
+
+        function clearAll() { current = '0'; prev = null; operator = null; resetNext = false; }
+        function negate() { current = String(parseFloat(current) * -1); }
+        function percent() { current = String(parseFloat(current) / 100); }
+
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const num = btn.dataset.num;
+                const fn = btn.dataset.fn;
+                if (num !== undefined) { inputNumber(num); updateScreen(); }
+                if (fn !== undefined) {
+                    if (fn === 'clear') clearAll();
+                    else if (fn === 'neg') negate();
+                    else if (fn === 'percent') percent();
+                    else if (fn === '=') compute();
+                    else if (['+', '-', '*', '/'].includes(fn)) setOperator(fn);
+                    updateScreen();
+                }
+            })
+        });
+
+        // Keyboard support
+        window.addEventListener('keydown', (e) => {
+            if (e.key >= '0' && e.key <= '9') { inputNumber(e.key); updateScreen(); }
+            else if (e.key === '.') { inputNumber('.'); updateScreen(); }
+            else if (e.key === 'Backspace') { current = current.slice(0, -1) || '0'; updateScreen(); }
+            else if (e.key === '+' || e.key === '-' || e.key === '*' || e.key === '/') { setOperator(e.key); updateScreen(); }
+            else if (e.key === 'Enter' || e.key === '=') { compute(); updateScreen(); }
+            else if (e.key.toLowerCase() === 'c') { clearAll(); updateScreen(); }
+        });
+
+        // initial render
+        updateScreen();
+    </script>
+</body>
+
+</html>
